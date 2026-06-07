@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD Habibur Rahman - Executive Medical Video Workspace</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS CDN (Excel Export) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: 'var(--bg)',
+                        cardBg: 'var(--card)',
+                        borderBg: 'var(--border)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* থিম ভ্যারিয়েবল আর্কিটেকচার */
+        .theme-midnight { 
+            --bg: #090d16; 
+            --card: #111625; 
+            --border: #1e293b; 
+            --accent: #10b981; 
+            --accent-glow: rgba(16, 185, 129, 0.08);
+        }
+        .theme-obsidian { 
+            --bg: #050506; 
+            --card: #0f0f11; 
+            --border: #222227; 
+            --accent: #14b8a6; 
+            --accent-glow: rgba(20, 184, 166, 0.08);
+        }
+        .theme-premiere { 
+            --bg: #090611; 
+            --card: #110e1e; 
+            --border: #2e1065; 
+            --accent: #6366f1; 
+            --accent-glow: rgba(99, 102, 241, 0.08);
+        }
+        
+        body {
+            background-color: var(--bg);
+            transition: background-color 0.4s ease, color 0.3s;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* মাউস ট্র্যাকিং গ্লো ইফেক্ট */
+        .glow-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), var(--accent-glow), transparent 80%);
+        }
+
+        .custom-card {
+            background-color: var(--card);
+            border-color: var(--border);
+            backdrop-filter: blur(8px);
+            transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .custom-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+        .custom-border {
+            border-color: var(--border);
+        }
+        .text-accent {
+            color: var(--accent);
+        }
+        .bg-accent {
+            background-color: var(--accent);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #invoiceModal, #invoiceModal * {
+                visibility: visible;
+            }
+            #invoiceModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            #invoiceModal button {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="theme-midnight text-slate-100 font-sans min-h-screen antialiased">
+
+    <!-- গ্লো ইফেক্ট ব্যাকগ্রাউন্ড -->
+    <div class="glow-bg"></div>
+
+    <!-- ================= ১. ওথেনটিকেশন ল্যান্ডিং পেজ ================= -->
+    <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#070a12] px-4">
+        <div class="max-w-md w-full bg-[#111625] border border-slate-800 p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-10 -left-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+
+            <div class="text-center mb-6 relative">
+                <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-file-medical-alt text-2xl text-emerald-400"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-white">মেডিকেল ভিডিও ট্র্যাকার</h1>
+                <p class="text-xs text-slate-400 mt-1">পেশাদার কাজের নিরাপদ ডাটাবেস</p>
+            </div>
+
+            <!-- কুইক ডেমো তথ্য নোটিশ -->
+            <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 mb-6 text-center text-xs text-emerald-300">
+                <i class="fa-solid fa-key mr-1"></i> ডেমো আইডি: <span class="font-mono font-bold text-white bg-slate-900 px-1.5 py-0.5 rounded">habib99</span> | পাসওয়ার্ড: <span class="font-mono font-bold text-white bg-slate-900 px-1.5 py-0.5 rounded">123</span>
+            </div>
+
+            <div class="flex border-b border-slate-800 mb-6">
+                <button id="tabLoginBtn" onclick="toggleAuthTab('login')" class="flex-1 py-2 text-center text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 transition">লগইন</button>
+                <button id="tabRegisterBtn" onclick="toggleAuthTab('register')" class="flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white transition">নিবন্ধন (Sign Up)</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ইউজার আইডি (User ID)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="loginUserId" required placeholder="Habib99" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg pl-10 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">পাসওয়ার্ড</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg pl-10 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-sm py-2.5 rounded-lg text-white font-bold transition shadow-lg">লগইন করুন</button>
+                
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-slate-800"></div>
+                    <span class="flex-shrink mx-3 text-xs text-slate-500">অথবা</span>
+                    <div class="flex-grow border-t border-slate-800"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="bypassDemoLogin()" class="w-full bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-xs py-2.5 rounded-lg text-emerald-400 font-bold flex items-center justify-center space-x-1.5 transition">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Demo Access</span>
+                    </button>
+                    <button type="button" onclick="handlePasskeyLogin()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs py-2.5 rounded-lg text-slate-200 font-semibold flex items-center justify-center space-x-1 transition">
+                        <i class="fa-solid fa-fingerprint text-emerald-400"></i>
+                        <span>Passkey PIN</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">সম্পূর্ণ নাম (Full Name)</label>
+                    <input type="text" id="regName" required placeholder="MD Habibur Rahman" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ইমেইল এড্রেস</label>
+                    <input type="email" id="regEmail" required placeholder="habib@example.com" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ইউনিক ইউজার আইডি (User ID)</label>
+                    <input type="text" id="regUserId" required placeholder="Habib99" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">পাসওয়ার্ড</label>
+                    <input type="password" id="regPassword" required placeholder="••••••••" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">৬ ডিজিটের পাসকি পিন সেট করুন</label>
+                    <input type="password" id="regPin" required maxlength="6" placeholder="যেমন: 123456" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-sm py-2.5 rounded-lg text-white font-bold transition shadow-lg">নিবন্ধন সম্পন্ন করুন</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= পাসকি সিমুলেটর মোডাল ================= -->
+    <div id="passkeyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 px-4">
+        <div class="bg-[#111625] border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center space-y-4 shadow-2xl relative">
+            <div class="mx-auto w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-fingerprint text-3xl text-emerald-400"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white">ডিভাইস ভেরিফিকেশন</h3>
+            <p class="text-xs text-slate-400">সংরক্ষিত পাসকি পিনটি ইনপুট করে ড্যাশবোর্ড আনলক করুন।</p>
+            <input type="password" id="passkeyPinInput" maxlength="6" placeholder="••••••" class="w-28 text-center tracking-widest bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-lg text-slate-100 focus:outline-none focus:border-emerald-500 mx-auto">
+            <div class="flex justify-center space-x-2 pt-2">
+                <button onclick="closePasskeyModal()" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2 rounded-lg text-slate-300">বাতিল</button>
+                <button onclick="verifyPasskey()" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2 rounded-lg text-white font-semibold">ভেরিফাই</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= ২. মেইন ড্যাশবোর্ড ইন্টারফেস ================= -->
+    <div id="dashboardApp" class="hidden min-h-screen flex flex-col relative z-10">
+
+        <!-- ২. প্রিমিয়াম ফিক্সড হেডার -->
+        <header class="sticky top-0 z-40 custom-card border-b px-6 py-4 flex justify-between items-center shadow-lg">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/20">
+                    <i class="fa-solid fa-staff-aesculapius text-accent text-lg"></i>
+                </div>
+                <div>
+                    <span id="headerUserName" class="text-lg font-bold text-white tracking-wide">MD Habibur Rahman</span>
+                    <p class="text-[10px] text-slate-400">মেডিকেল ভিডিও এডিটিং ড্যাশবোর্ড</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-1 bg-slate-950 px-2 py-1.5 rounded-lg border custom-border">
+                    <i class="fa-solid fa-palette text-[10px] text-accent mr-1"></i>
+                    <select id="themeSelector" onchange="changeTheme(this.value)" class="bg-transparent text-[10px] text-slate-300 font-bold focus:outline-none cursor-pointer">
+                        <option value="midnight" class="bg-slate-900 text-slate-100">Midnight Dark</option>
+                        <option value="obsidian" class="bg-slate-900 text-slate-100">Obsidian Black</option>
+                        <option value="premiere" class="bg-slate-900 text-slate-100">Premiere Purple</option>
+                    </select>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-2 text-xs text-slate-300 bg-slate-950 px-3 py-1.5 rounded-full border custom-border">
+                    <span class="w-2.5 h-2.5 rounded-full bg-accent animate-pulse"></span>
+                    <span class="font-medium">System: <span class="text-accent font-semibold">Smooth</span></span>
+                    <span class="text-slate-600">|</span>
+                    <span class="font-medium">Backup: <span class="text-accent font-semibold">Synced</span></span>
+                </div>
+                
+                <button onclick="logout()" class="text-xs bg-slate-800/80 hover:bg-rose-950 hover:text-rose-400 border border-slate-700 hover:border-rose-900 px-3 py-1.5 rounded-lg text-slate-300 transition">
+                    <i class="fa-solid fa-sign-out-alt mr-1"></i> লগআউট
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+            <!-- কি-বোর্ড শর্টকাট গাইড -->
+            <div class="hidden lg:flex justify-between items-center bg-slate-950/80 border custom-border px-4 py-2 rounded-lg text-[10px] text-slate-400">
+                <div class="flex space-x-4">
+                    <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-200">Alt + N</kbd> ফর্ম এন্ট্রি</span>
+                    <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-200">Space</kbd> টাইমার স্টার্ট/পজ</span>
+                    <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-200">Esc</kbd> ক্লোজ উইন্ডো</span>
+                </div>
+                <div class="text-accent flex items-center"><i class="fa-solid fa-circle-info mr-1"></i> কি-বোর্ড শর্টকাট সিস্টেম সম্পূর্ণ সচল রয়েছে</div>
+            </div>
+
+            <!-- ফিল্টার ও প্রgetProgress বার -->
+            <div class="custom-card p-4 rounded-xl border flex flex-col lg:flex-row justify-between items-center gap-4 shadow-xl">
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap"><i class="fa-solid fa-filter text-accent mr-1"></i> ফিল্টার:</span>
+                    
+                    <select id="filterMonth" onchange="handleFilterChange()" class="w-full sm:w-auto bg-slate-950 border custom-border rounded-lg px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                        <option value="current">চলতি মাস</option>
+                        <option value="all">সব মাস একত্রে</option>
+                        <option value="01">জানুয়ারি</option>
+                        <option value="02">ফেব্রুয়ারি</option>
+                        <option value="03">মার্চ</option>
+                        <option value="04">এপ্রিল</option>
+                        <option value="05">মে</option>
+                        <option value="06">জুন</option>
+                        <option value="07">জুলাই</option>
+                        <option value="08">আগস্ট</option>
+                        <option value="09">সেপ্টেম্বর</option>
+                        <option value="10">অক্টোবর</option>
+                        <option value="11">নভেম্বর</option>
+                        <option value="12">ডিসেম্বর</option>
+                    </select>
+
+                    <select id="filterYear" onchange="handleFilterChange()" class="w-full sm:w-auto bg-slate-950 border custom-border rounded-lg px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                        <option value="current">চলতি বছর</option>
+                        <option value="all">সব বছর একত্রে</option>
+                        <option value="2025">২০২৫</option>
+                        <option value="2026">২০২৬</option>
+                        <option value="2027">২০২৭</option>
+                        <option value="2028">২০২৮</option>
+                    </select>
+                </div>
+
+                <!-- কুইক প্রগ্রেস ইন্ডিকেটর -->
+                <div class="w-full lg:w-72 bg-slate-950 p-2.5 rounded-lg border custom-border flex flex-col justify-center">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
+                        <span>মাসিক কাজের লক্ষ্যমাত্রা অগ্রগতি</span>
+                        <span id="progressBarPercent" class="text-accent">০%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div id="progressBarFill" class="bg-accent h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="flex bg-slate-950 p-1 rounded-lg border custom-border w-full lg:w-auto justify-between">
+                    <button id="tabFilterAll" onclick="setStatusFilter('all')" class="flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold bg-accent text-white transition">সব কাজ</button>
+                    <button id="tabFilterPending" onclick="setStatusFilter('pending')" class="flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold text-slate-400 hover:text-white transition">চলমান/বাকি কাজ</button>
+                    <button id="tabFilterCompleted" onclick="setStatusFilter('Completed')" class="flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold text-slate-400 hover:text-white transition">সম্পন্ন কাজ</button>
+                </div>
+            </div>
+
+            <!-- ড্যাশবোর্ড কার্ড সামারি -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="custom-card p-4 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">চলতি মাসের ভিডিও</p>
+                        <h3 id="statTotalVideos" class="text-2xl font-bold text-white mt-1">০</h3>
+                    </div>
+                    <div class="bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20"><i class="fa-solid fa-video text-accent"></i></div>
+                </div>
+                <div class="custom-card p-4 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">সম্পন্ন ভিডিও</p>
+                        <h3 id="statCompleted" class="text-2xl font-bold text-accent mt-1">০</h3>
+                    </div>
+                    <div class="bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20"><i class="fa-solid fa-circle-check text-accent"></i></div>
+                </div>
+                <div class="custom-card p-4 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">আজকের মোট ভিডিও</p>
+                        <h3 id="statTodayQty" class="text-2xl font-bold text-blue-400 mt-1">০</h3>
+                    </div>
+                    <div class="bg-blue-500/10 p-3 rounded-lg border border-blue-500/20"><i class="fa-solid fa-calendar-day text-blue-400"></i></div>
+                </div>
+                <div class="custom-card p-4 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">চলতি মাসের মোট রিভিশন</p>
+                        <h3 id="statTotalRevisions" class="text-2xl font-bold text-amber-500 mt-1 font-mono">০</h3>
+                    </div>
+                    <div class="bg-amber-500/10 p-3 rounded-lg border border-amber-500/20"><i class="fa-solid fa-arrows-spin text-amber-400"></i></div>
+                </div>
+            </div>
+
+            <!-- স্টপওয়াচ, এস্টিমেটর ও ব্যাকআপ টুলস -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <!-- স্টপওয়াচ টাইমার -->
+                <div class="custom-card p-4 rounded-xl border flex flex-col justify-between">
+                    <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">স্টপওয়াচ টাইমার</span>
+                    <div class="flex items-center justify-between mt-2">
+                        <span id="timerDisplay" class="text-3xl font-mono text-accent">00:00:00</span>
+                        <div class="space-x-2">
+                            <button onclick="toggleTimer()" id="timerBtn" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-3 py-1.5 rounded-lg text-white font-semibold transition">Start</button>
+                            <button onclick="resetTimer()" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg text-slate-300 transition">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ভিডিও রেন্ডার সাইজ এস্টিমেটর -->
+                <div class="custom-card p-4 rounded-xl border flex flex-col justify-between">
+                    <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider"><i class="fa-solid fa-calculator text-accent mr-1"></i>রেন্ডার সাইজ ক্যালকুলেটর</span>
+                    <div class="grid grid-cols-3 gap-1 mt-1">
+                        <input type="number" id="calcDuration" placeholder="মিনিট" min="1" class="bg-slate-950 border custom-border rounded text-[10px] p-1 text-center focus:outline-none">
+                        <select id="calcRes" class="bg-slate-950 border custom-border rounded text-[10px] p-1 focus:outline-none">
+                            <option value="15">1080p</option>
+                            <option value="50">4K UHD</option>
+                        </select>
+                        <button onclick="calculateVideoSize()" class="bg-accent/15 text-accent text-[10px] rounded font-bold hover:bg-accent/25 transition">হিসাব করুন</button>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-2 flex justify-between">
+                        <span>সম্ভাব্য রেন্ডার ফাইল সাইজ:</span>
+                        <span id="calcResult" class="font-bold text-slate-200">-</span>
+                    </div>
+                </div>
+
+                <!-- রিসোর্স ও ব্যাকআপ প্যানেল -->
+                <div class="custom-card p-4 rounded-xl border flex flex-col justify-between">
+                    <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">রিসোর্স ও ব্যাকআপ প্যানেল</span>
+                    <div class="flex flex-wrap gap-1.5 mt-2">
+                        <a href="https://wa.me/" target="_blank" class="bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-1 rounded hover:bg-emerald-600/20 transition"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a>
+                        <button onclick="triggerEmailBackup()" class="bg-purple-600/10 text-purple-400 border border-purple-500/20 text-[10px] px-2 py-1 rounded hover:bg-purple-600/20 transition">Gmail Backup</button>
+                        <button onclick="exportJSONBackup()" class="bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700 hover:bg-slate-700 transition">JSON Backup</button>
+                        <label class="bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700 hover:bg-slate-700 cursor-pointer transition">
+                            Import JSON
+                            <input type="file" id="importFile" onchange="importJSONBackup(event)" class="hidden">
+                        </label>
+                        <button onclick="exportToExcel()" class="bg-amber-600/10 text-amber-400 border border-amber-500/20 text-[10px] px-2 py-1 rounded hover:bg-amber-600/20 transition">Excel Export</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ডাটা এন্ট্রি এবং ডুয়াল চার্ট প্যানেল -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- ডাটা এন্ট্রি ফর্ম (ভিডিওর ডিউরেশন ও প্ল্যাটফর্ম সহ) -->
+                <div class="custom-card p-6 rounded-xl border shadow-xl space-y-4 lg:col-span-2">
+                    <h2 class="text-base font-bold text-slate-200 border-b custom-border pb-2 flex items-center space-x-2">
+                        <i class="fa-solid fa-folder-plus text-accent"></i>
+                        <span>ভিডিও ডাটা এন্ট্রি ফর্ম</span>
+                    </h2>
+                    <form id="entryForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="hidden" id="editIndex" value="">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">তারিখ (Date)</label>
+                            <input type="date" id="formDate" required class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">ডাক্তার/ক্লিনিকের নাম</label>
+                            <input type="text" id="formClient" placeholder="যেমন: Dr. Kabir - Cardiologist" required class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">ভিডিওর ধরন (Type)</label>
+                            <select id="formType" class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                                <option value="Motion Graphics">Motion Graphics</option>
+                                <option value="Map Animation">Map Animation</option>
+                                <option value="Awareness Video">Awareness Video</option>
+                                <option value="Shorts">Shorts</option>
+                                <option value="Long Video">Long Video</option>
+                                <option value="Promo">Promo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">সম্পন্ন হওয়া সংখ্যা (Quantity)</label>
+                            <input type="number" id="formQty" min="1" value="1" required class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">কাজের স্ট্যাটাস</label>
+                            <select id="formStatus" class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                                <option value="To-Do">To-Do</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Pending Doctor's Approval">Pending Doctor's Approval</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">রিভিশন সংখ্যা</label>
+                            <input type="number" id="formRevision" min="0" value="0" class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">ভিডিওর ডিউরেশন (দৈর্ঘ্য)</label>
+                            <input type="text" id="formDuration" placeholder="যেমন: 10:15" required class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">টার্গেট প্ল্যাটফর্ম</label>
+                            <select id="formPlatform" class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                                <option value="YouTube">YouTube</option>
+                                <option value="Shorts">YouTube Shorts</option>
+                                <option value="Facebook">Facebook Video</option>
+                                <option value="TikTok">TikTok / Reels</option>
+                                <option value="Clinic Display">Clinic Screen</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs text-slate-400 mb-1">অ্যাসেট ও ফাইল লিংক</label>
+                            <input type="url" id="formLink" placeholder="Canva, Drive, Envato লিংক" class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs text-slate-400 mb-1">विशेष মন্তব্য/নোট</label>
+                            <input type="text" id="formNotes" placeholder="বিশেষ রিকোয়ারমেন্ট বা রিভিশনের ডিটেইলস..." class="w-full bg-slate-900 border custom-border rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div class="md:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="formCheck" class="w-4 h-4 text-emerald-500 bg-slate-900 border-slate-800 rounded focus:ring-emerald-500">
+                                <label for="formCheck" class="text-xs text-slate-300 font-semibold select-none">মেডিকেল তথ্য বা স্ক্রিপ্ট ১০০% নিখুঁত কিনা যাচাই করা হয়েছে</label>
+                            </div>
+                            <div class="flex space-x-2 self-end">
+                                <button type="button" onclick="resetForm()" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2 rounded-lg text-slate-300 font-semibold transition">বাতিল</button>
+                                <button type="submit" id="submitBtn" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-5 py-2 rounded-lg text-white font-semibold transition">যোগ করুন</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- চার্ট প্যানেল -->
+                <div class="custom-card p-5 rounded-xl border flex flex-col justify-between shadow-xl space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200 border-b custom-border pb-2"><i class="fa-solid fa-chart-pie text-accent mr-2"></i>ডুয়াল এনালিটিক্যাল গ্রাফ</h3>
+                    <!-- চার্ট ১ (ক্যাটাগরি) -->
+                    <div class="relative h-44 flex items-center justify-center border-b custom-border pb-2">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <!-- চার্ট ২ (প্ল্যাটফর্ম ডিস্ট্রিবিউশন) -->
+                    <div class="relative h-44 flex items-center justify-center">
+                        <canvas id="platformChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- কানবান বোর্ড -->
+            <div class="custom-card p-5 rounded-xl border shadow-xl space-y-4">
+                <h3 class="text-sm font-bold text-slate-200 border-b custom-border pb-2"><i class="fa-solid fa-chalkboard-user text-accent mr-2"></i>কানবান বোর্ড (ড্র্যাগ-অ্যান্ড-ড্রপ)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-2 h-[300px] overflow-y-auto pt-1">
+                    
+                    <!-- To-Do -->
+                    <div class="bg-slate-900/60 p-2.5 rounded-lg border custom-border flex flex-col" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'To-Do')">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 flex justify-between items-center bg-slate-950 px-2 py-1 rounded border custom-border">
+                            <span>To-Do</span> <span id="count_todo" class="text-slate-400">0</span>
+                        </span>
+                        <div id="col_todo" class="space-y-1.5 flex-grow overflow-y-auto min-h-[150px]"></div>
+                    </div>
+
+                    <!-- In Progress -->
+                    <div class="bg-slate-900/60 p-2.5 rounded-lg border custom-border flex flex-col" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'In Progress')">
+                        <span class="text-[10px] font-extrabold text-blue-400 uppercase tracking-wider mb-2 flex justify-between items-center bg-slate-950 px-2 py-1 rounded border custom-border">
+                            <span>In Progress</span> <span id="count_inprogress" class="text-blue-400">0</span>
+                        </span>
+                        <div id="col_inprogress" class="space-y-1.5 flex-grow overflow-y-auto min-h-[150px]"></div>
+                    </div>
+
+                    <!-- Review -->
+                    <div class="bg-slate-900/60 p-2.5 rounded-lg border custom-border flex flex-col" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Pending Doctor\'s Approval')">
+                        <span class="text-[10px] font-extrabold text-purple-400 uppercase tracking-wider mb-2 flex justify-between items-center bg-slate-950 px-2 py-1 rounded border custom-border">
+                            <span>Review</span> <span id="count_review" class="text-purple-400">0</span>
+                        </span>
+                        <div id="col_review" class="space-y-1.5 flex-grow overflow-y-auto min-h-[150px]"></div>
+                    </div>
+
+                    <!-- Completed -->
+                    <div class="bg-slate-900/60 p-2.5 rounded-lg border custom-border flex flex-col" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Completed')">
+                        <span class="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider mb-2 flex justify-between items-center bg-slate-950 px-2 py-1 rounded border custom-border">
+                            <span>Completed</span> <span id="count_completed" class="text-emerald-400">0</span>
+                        </span>
+                        <div id="col_completed" class="space-y-1.5 flex-grow overflow-y-auto min-h-[150px]"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- কাজের তালিকা (ডাটা টেবিল) -->
+            <div class="custom-card rounded-xl border overflow-hidden shadow-xl">
+                <div class="p-5 border-b custom-border flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-200">সার্বিক প্রজেক্ট ডাটাবেস</h2>
+                        <p class="text-[10px] text-slate-400 mt-0.5">সবগুলো কাজ নিচে তারিখ অনুযায়ী সুবিন্যস্তভাবে প্রদর্শিত হচ্ছে</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                        <input type="text" id="searchBar" oninput="renderAll()" placeholder="সার্চ ডাক্তার বা ক্লিনিক..." class="bg-slate-950 border custom-border rounded-lg px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 w-full sm:w-48">
+                        <input type="date" id="filterReportDate" class="bg-slate-950 border custom-border rounded-lg px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                        <button onclick="generateReport()" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-1.5 rounded-lg text-white font-bold transition flex items-center justify-center space-x-1 shadow-md shadow-emerald-600/10">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                            <span>Generate WhatsApp Report 🚀</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b custom-border">
+                            <tr>
+                                <th class="p-4">তারিখ</th>
+                                <th class="p-4">ক্লায়েন্ট / ডাক্তার</th>
+                                <th class="p-4">ভিডিওর ধরন</th>
+                                <th class="p-4 text-center">Qty</th>
+                                <th class="p-4">ভিডিও ডিউরেশন</th>
+                                <th class="p-4">প্ল্যাটফর্ম</th>
+                                <th class="p-4">ফ্যাক্ট-চেক</th>
+                                <th class="p-4">কাজের স্ট্যাটাস</th>
+                                <th class="p-4 text-center">রিভিশন</th>
+                                <th class="p-4">লিংক</th>
+                                <th class="p-4 text-right">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entriesTableBody" class="divide-y divide-slate-800/60">
+                            <!-- ডাইনামিক ডেটা রো -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================= কোয়ালিটি কন্ট্রোল মোডাল ================= -->
+    <div id="qcModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4">
+        <div class="bg-[#111625] border border-slate-800 p-6 rounded-xl max-w-sm w-full space-y-4 shadow-2xl relative">
+            <h3 class="text-base font-bold text-slate-200 flex items-center space-x-2 border-b border-slate-800 pb-2">
+                <i class="fa-solid fa-clipboard-check text-amber-400"></i>
+                <span>রেন্ডার-পূর্ব কোয়ালিটি চেকলিস্ট</span>
+            </h3>
+            <p class="text-xs text-slate-400">কাজটিকে সফলভাবে "Completed" মার্ক করার আগে অনুগ্রহ করে সবগুলো কনফার্ম করুন:</p>
+            <div class="space-y-3 pt-2">
+                <label class="flex items-start space-x-2 text-xs text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" id="qcCheck1" class="mt-0.5 rounded text-emerald-500 bg-slate-900 border-slate-800 focus:ring-emerald-500">
+                    <span>ডাক্তারের নাম, ডিগ্রি ও স্পেশালিটির বানান নির্ভুল?</span>
+                </label>
+                <label class="flex items-start space-x-2 text-xs text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" id="qcCheck2" class="mt-0.5 rounded text-emerald-500 bg-slate-900 border-slate-800 focus:ring-emerald-500">
+                    <span>ভিডিওর মেডিকেল তথ্য ও তথ্যসূত্র ১০০% পরীক্ষিত?</span>
+                </label>
+                <label class="flex items-start space-x-2 text-xs text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" id="qcCheck3" class="mt-0.5 rounded text-emerald-500 bg-slate-900 border-slate-800 focus:ring-emerald-500">
+                    <span>ভিডিওর কাট, অডিও ক্ল্যারিটি ও কোয়ালিটি ঠিক আছে?</span>
+                </label>
+            </div>
+            <div class="flex justify-end space-x-2 pt-4 border-t border-slate-800">
+                <button onclick="closeQCModal()" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg text-slate-300">বাতিল</button>
+                <button onclick="confirmQCSuccess()" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-3 py-1.5 rounded-lg text-white font-semibold">নিশ্চিত করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT SYSTEM ================= -->
+    <script>
+        let currentUser = null;
+        let projects = [];
+        let chartInstance = null;
+        let platformChartInstance = null;
+        let pendingQCIndex = null;
+        let pendingQCData = null;
+        let activeAuthTab = 'login';
+
+        let filters = {
+            month: 'current', 
+            year: 'current',  
+            status: 'all'     
+        };
+
+        // নিরাপদ লোকাল স্টোরেজ র‍্যাপার (Safe Storage Wrapper) [৬]
+        const SafeStorage = {
+            isSupported: true,
+            memoryDb: {},
+            init: function() {
+                try {
+                    localStorage.setItem('__test_storage_active__', 'yes');
+                    localStorage.removeItem('__test_storage_active__');
+                    this.isSupported = true;
+                } catch(e) {
+                    this.isSupported = false;
+                    console.warn("LocalStorage is disabled/blocked in this browser. Falling back to Memory Storage.");
+                }
+            },
+            getItem: function(key) {
+                if (this.isSupported) return localStorage.getItem(key);
+                return this.memoryDb[key] || null;
+            },
+            setItem: function(key, val) {
+                if (this.isSupported) {
+                    try { localStorage.setItem(key, val); return; } catch(e){}
+                }
+                this.memoryDb[key] = String(val);
+            },
+            removeItem: function(key) {
+                if (this.isSupported) {
+                    try { localStorage.removeItem(key); return; } catch(e){}
+                }
+                delete this.memoryDb[key];
+            }
+        };
+        SafeStorage.init();
+
+        // লোকাল টাইমজোন ডেট ডিটেক্টর (Strict Local Date String)
+        function getLocalDateString() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        // কীবোর্ড শর্টকাট লিসেনার
+        window.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key.toLowerCase() === 'n') {
+                e.preventDefault();
+                document.getElementById('formClient').focus();
+                document.getElementById('entryForm').scrollIntoView({ behavior: 'smooth' });
+                playAudioBeep('click');
+            }
+            if (e.key === 'Escape') {
+                closeQCModal();
+                closePasskeyModal();
+            }
+            if (e.code === 'Space') {
+                const activeTag = document.activeElement.tagName.toLowerCase();
+                if (activeTag !== 'input' && activeTag !== 'textarea' && activeTag !== 'select') {
+                    e.preventDefault();
+                    toggleTimer();
+                }
+            }
+        });
+
+        // ভিডিও রেন্ডার ফাইল সাইজ ক্যালকুলেটর লজিক
+        function calculateVideoSize() {
+            const minutes = parseInt(document.getElementById('calcDuration').value);
+            const bitrate = parseInt(document.getElementById('calcRes').value);
+            
+            if (isNaN(minutes) || minutes <= 0) {
+                alert('অনুগ্রহ করে সঠিক মিনিট ইনপুট দিন!');
+                return;
+            }
+
+            const seconds = minutes * 60;
+            const sizeInMB = (seconds * bitrate) / 8;
+            
+            let resultText = '';
+            if (sizeInMB >= 1024) {
+                resultText = `${(sizeInMB / 1024).toFixed(2)} GB (প্রায়)`;
+            } else {
+                resultText = `${sizeInMB.toFixed(0)} MB (প্রায়)`;
+            }
+
+            document.getElementById('calcResult').innerText = resultText;
+            playAudioBeep('success');
+        }
+
+        // মৃদু অডিও ফিডব্যাক (Web Audio API)
+        function playAudioBeep(type) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                
+                if (type === 'success') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); 
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.25);
+                    
+                    setTimeout(() => {
+                        const osc2 = ctx.createOscillator();
+                        const gain2 = ctx.createGain();
+                        osc2.type = 'sine';
+                        osc2.connect(gain2);
+                        gain2.connect(ctx.destination);
+                        osc2.frequency.setValueAtTime(880.00, ctx.currentTime); 
+                        gain2.gain.setValueAtTime(0.08, ctx.currentTime);
+                        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                        osc2.start(ctx.currentTime);
+                        osc2.stop(ctx.currentTime + 0.3);
+                    }, 80);
+                } else if (type === 'click') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(1000, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.05);
+                }
+            } catch (e) {
+                console.log("Audio contextual gesture required.");
+            }
+        }
+
+        // থিম পরিবর্তনের লজিক
+        function changeTheme(themeName) {
+            document.body.className = ''; 
+            if (themeName === 'midnight') {
+                document.body.className = 'theme-midnight text-slate-100 font-sans min-h-screen antialiased';
+            } else if (themeName === 'obsidian') {
+                document.body.className = 'theme-obsidian text-slate-100 font-sans min-h-screen antialiased';
+            } else if (themeName === 'premiere') {
+                document.body.className = 'theme-premiere text-slate-100 font-sans min-h-screen antialiased';
+            }
+            localStorage.setItem('med_tracker_theme', themeName);
+            playAudioBeep('click');
+        }
+
+        // ওথেনটিকেশন ও ওয়ার্কস্পেস সেপারেশন
+        function toggleAuthTab(type) {
+            activeAuthTab = type;
+            const tabLogin = document.getElementById('tabLoginBtn');
+            const tabReg = document.getElementById('tabRegisterBtn');
+            const loginForm = document.getElementById('loginForm');
+            const regForm = document.getElementById('registerForm');
+
+            if (type === 'login') {
+                tabLogin.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 transition";
+                tabReg.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white transition";
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+            } else {
+                tabReg.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 transition";
+                tabLogin.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white transition";
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const userId = document.getElementById('regUserId').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value;
+            const pin = document.getElementById('regPin').value;
+
+            if (!userId) return;
+
+            let users = JSON.parse(SafeStorage.getItem('med_tracker_users')) || {};
+            if (users[userId]) {
+                alert('এই ইউজার আইডি ইতিমধ্যে নিবন্ধিত রয়েছে!');
+                return;
+            }
+
+            users[userId] = { name, email, userId, password, pin };
+            SafeStorage.setItem('med_tracker_users', JSON.stringify(users));
+
+            // ব্যক্তিগত ওয়ার্কস্পেস ডাটাবেস
+            SafeStorage.setItem(`med_tracker_data_${userId}`, JSON.stringify([]));
+
+            alert('নিবন্ধন সম্পন্ন হয়েছে!');
+            toggleAuthTab('login');
+            document.getElementById('loginUserId').value = userId;
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const userId = document.getElementById('loginUserId').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+
+            let users = JSON.parse(SafeStorage.getItem('med_tracker_users')) || {};
+            const user = users[userId];
+
+            if (user && user.password === password) {
+                initiateUserSession(user);
+            } else {
+                alert('ভুল ইউজার আইডি অথবা পাসওয়ার্ড!');
+            }
+        }
+
+        // ওয়ান ক্লিকে ডেমো অ্যাক্সেস বাইপাস (Bypass Logic Repair)
+        function bypassDemoLogin() {
+            let users = {};
+            try {
+                users = JSON.parse(SafeStorage.getItem('med_tracker_users')) || {};
+            } catch(e){}
+            
+            let user = users['habib99'];
+            if (!user) {
+                // ডাটাবেস করাপ্ট বা ব্লকড হলে ফ্লাইতে রিকভার করবে
+                user = {
+                    name: 'MD Habibur Rahman',
+                    email: 'habibur@example.com',
+                    userId: 'habib99',
+                    password: '123',
+                    pin: '123456'
+                };
+                users['habib99'] = user;
+                SafeStorage.setItem('med_tracker_users', JSON.stringify(users));
+                
+                const todayStr = getLocalDateString();
+                const demoData = [
+                    { id: 1, date: todayStr, client: 'Dr. Kabir (Cardiologist)', type: 'Map Animation', qty: 2, check: true, status: 'Completed', revision: 0, link: 'https://canva.com', notes: 'রেন্ডার শেষ', duration: '12:30', platform: 'YouTube' },
+                    { id: 2, date: todayStr, client: 'Care Hospital', type: 'Awareness Video', qty: 1, check: true, status: 'In Progress', revision: 1, link: 'https://drive.google.com', notes: 'কালার গ্রেডিং বাকী', duration: '01:30', platform: 'Shorts' }
+                ];
+                SafeStorage.setItem('med_tracker_data_habib99', JSON.stringify(demoData));
+            }
+            initiateUserSession(user);
+        }
+
+        function handlePasskeyLogin() {
+            const lastUser = SafeStorage.getItem('med_tracker_last_user');
+            if (!lastUser) {
+                alert('প্রথমে একবার আইডি পাসওয়ার্ড দিয়ে ভেরিফাই করুন।');
+                return;
+            }
+            document.getElementById('passkeyModal').classList.remove('hidden');
+            document.getElementById('passkeyPinInput').focus();
+        }
+
+        function closePasskeyModal() {
+            document.getElementById('passkeyModal').classList.add('hidden');
+            document.getElementById('passkeyPinInput').value = '';
+        }
+
+        function verifyPasskey() {
+            const inputPin = document.getElementById('passkeyPinInput').value;
+            const lastUserId = SafeStorage.getItem('med_tracker_last_user');
+            let users = JSON.parse(SafeStorage.getItem('med_tracker_users')) || {};
+            const user = users[lastUserId];
+
+            if (user && user.pin === inputPin) {
+                initiateUserSession(user);
+                closePasskeyModal();
+            } else {
+                alert('ভুল পাসকি পিন!');
+            }
+        }
+
+        function initiateUserSession(user) {
+            currentUser = user;
+            SafeStorage.setItem('med_tracker_last_user', user.userId);
+            
+            // ডাটাবেস সেপারেশন লোড [৬]
+            projects = JSON.parse(SafeStorage.getItem(`med_tracker_data_${user.userId}`)) || [];
+
+            // থিম রিস্টোর
+            const savedTheme = localStorage.getItem('med_tracker_theme') || 'midnight';
+            document.getElementById('themeSelector').value = savedTheme;
+            changeTheme(savedTheme);
+
+            document.getElementById('headerUserName').innerText = user.name;
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('dashboardApp').classList.remove('hidden');
+
+            renderAll();
+            playAudioBeep('success');
+        }
+
+        function logout() {
+            currentUser = null;
+            projects = [];
+            document.getElementById('dashboardApp').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+        }
+
+        function getFilteredProjects() {
+            const now = new Date();
+            const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+            const currentYear = String(now.getFullYear());
+
+            return projects.filter(p => {
+                const pDate = p.date;
+                if (!pDate) return false;
+                const [pYear, pMonth, pDay] = pDate.split('-');
+
+                if (filters.month === 'current') {
+                    if (pMonth !== currentMonth) return false;
+                } else if (filters.month !== 'all') {
+                    if (pMonth !== filters.month) return false;
+                }
+
+                if (filters.year === 'current') {
+                    if (pYear !== currentYear) return false;
+                } else if (filters.year !== 'all') {
+                    if (pYear !== filters.year) return false;
+                }
+
+                if (filters.status === 'pending') {
+                    if (p.status === 'Completed') return false;
+                } else if (filters.status !== 'all') {
+                    if (p.status !== filters.status) return false;
+                }
+
+                const searchVal = document.getElementById('searchBar').value.toLowerCase();
+                if (searchVal && !p.client.toLowerCase().includes(searchVal)) return false;
+
+                return true;
+            });
+        }
+
+        function handleFilterChange() {
+            filters.month = document.getElementById('filterMonth').value;
+            filters.year = document.getElementById('filterYear').value;
+            renderAll();
+        }
+
+        function setStatusFilter(status) {
+            filters.status = status;
+            
+            const btnAll = document.getElementById('tabFilterAll');
+            const btnPending = document.getElementById('tabFilterPending');
+            const btnCompleted = document.getElementById('tabFilterCompleted');
+
+            btnAll.className = "flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold text-slate-400 hover:text-white transition";
+            btnPending.className = "flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold text-slate-400 hover:text-white transition";
+            btnCompleted.className = "flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold text-slate-400 hover:text-white transition";
+
+            if (status === 'all') {
+                btnAll.className = "flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold bg-accent text-white transition";
+            } else if (status === 'pending') {
+                btnPending.className = "flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold bg-accent text-white transition";
+            } else if (status === 'Completed') {
+                btnCompleted.className = "flex-1 lg:flex-none text-xs px-4 py-1.5 rounded-md font-semibold bg-accent text-white transition";
+            }
+
+            renderAll();
+            playAudioBeep('click');
+        }
+
+        function renderAll() {
+            const filtered = getFilteredProjects();
+            renderCounters(filtered);
+            renderTable(filtered);
+            renderKanban(filtered);
+            updateChart(filtered);
+            renderProgressBar(filtered);
+        }
+
+        function renderProgressBar(filteredData) {
+            let total = filteredData.length;
+            if (total === 0) {
+                document.getElementById('progressBarFill').style.width = '0%';
+                document.getElementById('progressBarPercent').innerText = '0%';
+                return;
+            }
+            let completed = filteredData.filter(p => p.status === 'Completed').length;
+            let percent = Math.round((completed / total) * 100);
+            
+            document.getElementById('progressBarFill').style.width = `${percent}%`;
+            document.getElementById('progressBarPercent').innerText = `${percent}%`;
+        }
+
+        // চাকরিভিত্তিক সংশোধিত কাউন্টার সিস্টেম (চাকরির কাজের অগ্রগতির জন্য)
+        function renderCounters(filteredData) {
+            let totalQty = 0;
+            let completedQty = 0;
+            let totalRevisions = 0;
+            let todayQty = 0;
+
+            const todayStr = getLocalDateString();
+
+            filteredData.forEach(p => {
+                totalQty += p.qty;
+                totalRevisions += (p.revision || 0);
+
+                if (p.status === 'Completed') {
+                    completedQty += p.qty;
+                }
+
+                if (p.date === todayStr) {
+                    todayQty += p.qty;
+                }
+            });
+
+            document.getElementById('statTotalVideos').innerText = totalQty;
+            document.getElementById('statCompleted').innerText = completedQty;
+            document.getElementById('statTodayQty').innerText = todayQty;
+            document.getElementById('statTotalRevisions').innerText = totalRevisions;
+        }
+
+        function getSmartLinkBadge(url) {
+            if (!url) return '-';
+            let cleanUrl = url.toLowerCase();
+            let icon = 'fa-solid fa-link';
+            let text = 'Link';
+            let colorClass = 'text-blue-400 hover:text-blue-300';
+            
+            if (cleanUrl.includes('canva.com')) {
+                icon = 'fa-solid fa-palette';
+                text = 'Canva';
+                colorClass = 'text-cyan-400 hover:text-cyan-300';
+            } else if (cleanUrl.includes('drive.google.com') || cleanUrl.includes('docs.google.com')) {
+                icon = 'fa-brands fa-google-drive';
+                text = 'Drive';
+                colorClass = 'text-amber-500 hover:text-amber-400';
+            } else if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
+                icon = 'fa-brands fa-youtube';
+                text = 'YouTube';
+                colorClass = 'text-red-500 hover:text-red-400';
+            } else if (cleanUrl.includes('envato.com')) {
+                icon = 'fa-solid fa-leaf';
+                text = 'Envato';
+                colorClass = 'text-emerald-400 hover:text-emerald-300';
+            } else if (cleanUrl.includes('freepik.com')) {
+                icon = 'fa-solid fa-vector-square';
+                text = 'Freepik';
+                colorClass = 'text-sky-400 hover:text-sky-300';
+            }
+            
+            return `<a href="${url}" target="_blank" class="${colorClass} inline-flex items-center space-x-1 font-bold transition">
+                <i class="${icon} text-[11px] mr-1"></i><span>${text}</span>
+            </a>`;
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const editIndexVal = document.getElementById('editIndex').value;
+            const status = document.getElementById('formStatus').value;
+            const isChecked = document.getElementById('formCheck').checked;
+
+            const entryData = {
+                id: editIndexVal !== "" ? parseInt(editIndexVal, 10) : Date.now(),
+                date: document.getElementById('formDate').value,
+                client: document.getElementById('formClient').value,
+                type: document.getElementById('formType').value,
+                qty: parseInt(document.getElementById('formQty').value, 10) || 1,
+                status: status,
+                revision: parseInt(document.getElementById('formRevision').value, 10) || 0,
+                duration: document.getElementById('formDuration').value || '0:00',
+                platform: document.getElementById('formPlatform').value,
+                link: document.getElementById('formLink').value,
+                notes: document.getElementById('formNotes').value,
+                check: isChecked
+            };
+
+            if (status === 'Completed') {
+                pendingQCIndex = editIndexVal !== "" ? parseInt(editIndexVal, 10) : -1;
+                pendingQCData = entryData;
+                openQCModal();
+            } else {
+                saveEntry(editIndexVal !== "" ? parseInt(editIndexVal, 10) : null, entryData);
+            }
+        }
+
+        function saveEntry(id, data) {
+            if (id !== null && id >= 0) {
+                const index = projects.findIndex(p => p.id === id);
+                if (index !== -1) projects[index] = data;
+            } else {
+                projects.push(data);
+            }
+            saveWorkspace();
+            resetForm();
+            renderAll();
+            playAudioBeep('success');
+        }
+
+        function saveWorkspace() {
+            if (currentUser) {
+                SafeStorage.setItem(`med_tracker_data_${currentUser.userId}`, JSON.stringify(projects));
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('editIndex').value = '';
+            document.getElementById('entryForm').reset();
+            document.getElementById('formDate').value = getLocalDateString();
+            document.getElementById('submitBtn').innerText = 'যোগ করুন';
+        }
+
+        // ইউনিক আইডি-ভিত্তিক এডিট
+        function editEntry(id) {
+            const p = projects.find(item => item.id === id);
+            if (!p) return;
+            document.getElementById('editIndex').value = p.id;
+            document.getElementById('formDate').value = p.date;
+            document.getElementById('formClient').value = p.client;
+            document.getElementById('formType').value = p.type;
+            document.getElementById('formQty').value = p.qty;
+            document.getElementById('formStatus').value = p.status;
+            document.getElementById('formRevision').value = p.revision;
+            document.getElementById('formDuration').value = p.duration || '';
+            document.getElementById('formPlatform').value = p.platform || 'YouTube';
+            document.getElementById('formLink').value = p.link;
+            document.getElementById('formNotes').value = p.notes;
+            document.getElementById('formCheck').checked = p.check;
+            document.getElementById('submitBtn').innerText = 'আপডেট করুন';
+            document.getElementById('entryForm').scrollIntoView({ behavior: 'smooth' });
+            playAudioBeep('click');
+        }
+
+        // ইউনিক আইডি-ভিত্তিক রিভিশন
+        function sendToRevision(id) {
+            const index = projects.findIndex(p => p.id === id);
+            if (index !== -1) {
+                projects[index].status = 'Revision';
+                projects[index].revision = (projects[index].revision || 0) + 1;
+                saveWorkspace();
+                renderAll();
+                playAudioBeep('success');
+            }
+        }
+
+        // ইউনিক আইডি-ভিত্তিক ডিলিট
+        function deleteEntry(id) {
+            if (confirm('আপনি কি নিশ্চিত যে এই এন্ট্রিটি ডিলিট করতে চান?')) {
+                const index = projects.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    projects.splice(index, 1);
+                    saveWorkspace();
+                    renderAll();
+                    playAudioBeep('click');
+                }
+            }
+        }
+
+        function openQCModal() {
+            document.getElementById('qcModal').classList.remove('hidden');
+        }
+
+        function closeQCModal() {
+            document.getElementById('qcModal').classList.add('hidden');
+            document.getElementById('qcCheck1').checked = false;
+            document.getElementById('qcCheck2').checked = false;
+            document.getElementById('qcCheck3').checked = false;
+            pendingQCIndex = null;
+            pendingQCData = null;
+            renderAll();
+        }
+
+        function confirmQCSuccess() {
+            const c1 = document.getElementById('qcCheck1').checked;
+            const c2 = document.getElementById('qcCheck2').checked;
+            const c3 = document.getElementById('qcCheck3').checked;
+
+            if (c1 && c2 && c3) {
+                pendingQCData.check = true;
+                saveEntry(pendingQCIndex !== -1 ? pendingQCIndex : null, pendingQCData);
+                closeQCModal();
+            } else {
+                alert('অনুগ্রহ করে প্রজেক্ট সম্পন্ন করতে সবগুলো গুণগত মানদণ্ডে টিক দিন!');
+            }
+        }
+
+        function triggerEmailBackup() {
+            if (!currentUser) return;
+            const dataStr = JSON.stringify(projects, null, 2);
+            const subject = encodeURIComponent(`Medical Video Tracker Backup - ${currentUser.name}`);
+            const body = encodeURIComponent(`নিচে আপনার ব্যাকআপ ডাটা কোড দেওয়া হলো:\n\n${dataStr}`);
+            window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${currentUser.email}&su=${subject}&body=${body}`, '_blank');
+        }
+
+        function exportJSONBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `Workspace_Backup_${currentUser.userId}_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            playAudioBeep('success');
+        }
+
+        function importJSONBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        if (confirm('পূর্বের ডাটা ওভাররাইট করে এই ব্যাকআপ ফাইলটি রিস্টোর করতে চান?')) {
+                            projects = importedData;
+                            saveWorkspace();
+                            renderAll();
+                            alert('ডাটা সফলভাবে রিস্টোর হয়েছে!');
+                            playAudioBeep('success');
+                        }
+                    } else {
+                        alert('ভুল ব্যাকআপ ফাইল ফরম্যাট!');
+                    }
+                } catch (err) {
+                    alert('ফাইল রিড করতে সমস্যা হয়েছে!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // সংশোধিত ও সম্পূর্ণ সচল হোয়াটসঅ্যাপ রিপোর্ট জেনারেটর (TIMEZONE BUG & POPOUP BLOCK FIXED)
+        function generateReport() {
+            let selectedDate = document.getElementById('filterReportDate').value;
+            
+            // যদি ইনপুট ফিল্ডটি খালি থাকে, তবে আজকের সঠিক লোকাল তারিখ নিবে
+            if (!selectedDate) {
+                selectedDate = getLocalDateString();
+                document.getElementById('filterReportDate').value = selectedDate;
+            }
+
+            // তারিখ ভিত্তিক কাজের ডাটা ফিল্টার করা
+            const activeWorks = projects.filter(p => p.date === selectedDate);
+            if (activeWorks.length === 0) {
+                alert(`নির্বাচনকৃত তারিখ (${formatDate(selectedDate)})-এ কোনো কাজের রেকর্ড পাওয়া যায়নি! আপনি যদি আজ এন্ট্রি করে থাকেন, তবে ডাটা টেবিল চেক করুন।`);
+                return;
+            }
+
+            const [yyyy, mm, dd] = selectedDate.split('-');
+            const formattedDate = `${dd}-${mm}-${yyyy}`;
+
+            let reportText = `Daily Report | ${currentUser ? currentUser.name : 'MD Habibur Rahman'}\nDate: ${formattedDate}\n\n`;
+            activeWorks.forEach((p, index) => {
+                reportText += `${index + 1}. ${p.client} - ${p.type} [${p.qty}] -> ${p.status}\n`;
+            });
+            reportText += `\nGenerated via Personal Tracker`;
+
+            // পপ-আপ ব্লকারের ব্যাকআপ হিসেবে ক্লিপবোর্ডে কপি করার অত্যন্ত নির্ভরযোগ্য সিস্টেম (Clipboard Copy Backup UX)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(reportText).then(() => {
+                    alert(`রিপোর্টটি জেনারেট হয়ে স্বয়ংক্রিয়ভাবে আপনার কম্পিউটারের ক্লিপবোর্ডে কপি হয়েছে। হোয়াটসঅ্যাপ চ্যাট ওপেন হওয়ার পর শুধু Ctrl+V চাপুন এবং সেন্ড করুন।`);
+                    openWhatsApp(reportText);
+                }).catch(err => {
+                    openWhatsApp(reportText);
+                });
+            } else {
+                openWhatsApp(reportText);
+            }
+        }
+
+        function openWhatsApp(text) {
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(whatsappUrl, '_blank');
+            playAudioBeep('success');
+        }
+
+        function exportToExcel() {
+            const dataToExport = projects.map(p => ({
+                'Date': p.date,
+                'Client/Doctor': p.client,
+                'Type': p.type,
+                'Quantity': p.qty,
+                'Duration': p.duration,
+                'Platform': p.platform,
+                'Fact Check': p.check ? 'Verified' : 'Pending',
+                'Status': p.status,
+                'Revisions': p.revision,
+                'Resource Link': p.link,
+                'Notes': p.notes
+            }));
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Video Report");
+            XLSX.writeFile(wb, `Video_Tracker_${currentUser.userId}.xlsx`);
+        }
+
+        let timerInterval = null;
+        let elapsedSeconds = 0;
+        function toggleTimer() {
+            const btn = document.getElementById('timerBtn');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.innerText = 'Start';
+                btn.className = "bg-emerald-600 hover:bg-emerald-500 text-xs px-3 py-1.5 rounded-lg text-white font-semibold transition";
+                playAudioBeep('click');
+            } else {
+                timerInterval = setInterval(() => {
+                    elapsedSeconds++;
+                    const hrs = String(Math.floor(elapsedSeconds / 3600)).padStart(2, '0');
+                    const mins = String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2, '0');
+                    const secs = String(elapsedSeconds % 60).padStart(2, '0');
+                    document.getElementById('timerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+                }, 1000);
+                btn.innerText = 'Pause';
+                btn.className = "bg-rose-600 hover:bg-rose-500 text-xs px-3 py-1.5 rounded-lg text-white font-semibold transition";
+                playAudioBeep('click');
+            }
+        }
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            elapsedSeconds = 0;
+            document.getElementById('timerDisplay').innerText = '00:00:00';
+            const btn = document.getElementById('timerBtn');
+            btn.innerText = 'Start';
+            btn.className = "bg-emerald-600 hover:bg-emerald-500 text-xs px-3 py-1.5 rounded-lg text-white font-semibold transition";
+            playAudioBeep('click');
+        }
+
+        // ডুয়াল চার্ট রেন্ডারিং লজিক (ভিডিওর প্রকার ও প্ল্যাটফর্ম ডিস্ট্রিবিউশন)
+        function updateChart(filteredData) {
+            // ১. ক্যাটাগরি পাই চার্ট
+            const categories = {};
+            filteredData.forEach(p => {
+                categories[p.type] = (categories[p.type] || 0) + p.qty;
+            });
+
+            const catLabels = Object.keys(categories);
+            const catData = Object.values(categories);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catData,
+                        backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#64748b'],
+                        borderWidth: 1,
+                        borderColor: 'var(--card)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { size: 8 } }
+                        }
+                    }
+                }
+            });
+
+            // ২. টার্গেট প্ল্যাটফর্ম চার্ট (চাকরিভিত্তিক কাজের ডিস্ট্রিবিউশন)
+            const platforms = {};
+            filteredData.forEach(p => {
+                const plat = p.platform || 'YouTube';
+                platforms[plat] = (platforms[plat] || 0) + p.qty;
+            });
+
+            const platLabels = Object.keys(platforms);
+            const platData = Object.values(platforms);
+
+            if (platformChartInstance) {
+                platformChartInstance.destroy();
+            }
+
+            const ctxPlat = document.getElementById('platformChart').getContext('2d');
+            platformChartInstance = new Chart(ctxPlat, {
+                type: 'bar',
+                data: {
+                    labels: platLabels,
+                    datasets: [{
+                        label: 'সম্পাদিত ভিডিওর সংখ্যা',
+                        data: platData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.65)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 8 } } },
+                        y: { grid: { color: 'rgba(148, 163, 184, 0.1)' }, ticks: { color: '#94a3b8', font: { size: 8 } } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function renderKanban(filteredData) {
+            const cols = {
+                'To-Do': document.getElementById('col_todo'),
+                'In Progress': document.getElementById('col_inprogress'),
+                'Pending Doctor\'s Approval': document.getElementById('col_review'),
+                'Completed': document.getElementById('col_completed')
+            };
+
+            const counts = { 'To-Do': 0, 'In Progress': 0, 'Pending Doctor\'s Approval': 0, 'Completed': 0 };
+            Object.keys(cols).forEach(k => cols[k].innerHTML = '');
+
+            filteredData.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 p-2 border border-slate-800 rounded cursor-grab active:cursor-grabbing hover:border-slate-700 space-y-1";
+                card.draggable = true;
+                card.setAttribute('ondragstart', `handleDragStart(event, ${p.id})`);
+
+                card.innerHTML = `
+                    <div class="font-bold text-slate-200 text-[10px] truncate">${p.client}</div>
+                    <div class="text-[8px] text-slate-400 flex justify-between">
+                        <span>${p.type}</span>
+                        <span class="bg-slate-900 px-1 rounded text-slate-300 font-bold">Qty: ${p.qty}</span>
+                    </div>
+                `;
+                if (cols[p.status]) {
+                    cols[p.status].appendChild(card);
+                    counts[p.status] += p.qty;
+                }
+            });
+
+            document.getElementById('count_todo').innerText = counts['To-Do'];
+            document.getElementById('count_inprogress').innerText = counts['In Progress'];
+            document.getElementById('count_review').innerText = counts['Pending Doctor\'s Approval'];
+            document.getElementById('count_completed').innerText = counts['Completed'];
+        }
+
+        let draggedIdx = null;
+        function handleDragStart(e, id) {
+            draggedIdx = id;
+            e.dataTransfer.setData('text/plain', id);
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e, targetStatus) {
+            e.preventDefault();
+            const projId = draggedIdx !== null ? draggedIdx : parseInt(e.dataTransfer.getData('text/plain'), 10);
+            if (isNaN(projId)) return;
+
+            const index = projects.findIndex(p => p.id === projId);
+            if (index === -1) return;
+
+            const p = projects[index];
+            if (p.status === targetStatus) return;
+
+            const updated = { ...p, status: targetStatus };
+
+            if (targetStatus === 'Completed') {
+                pendingQCIndex = projId;
+                pendingQCData = updated;
+                openQCModal();
+            } else {
+                projects[index].status = targetStatus;
+                saveWorkspace();
+                renderAll();
+            }
+            draggedIdx = null;
+        }
+
+        // ডাটাবেস টেবিল রেন্ডার
+        function renderTable(filteredData) {
+            const tbody = document.getElementById('entriesTableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(p => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-800/10 transition";
+                row.innerHTML = `
+                    <td class="p-4 whitespace-nowrap text-slate-300 font-mono">${formatDate(p.date)}</td>
+                    <td class="p-4 font-semibold text-slate-200">${p.client}</td>
+                    <td class="p-4 text-slate-300">${p.type}</td>
+                    <td class="p-4 text-center font-bold text-slate-300">${p.qty}</td>
+                    <td class="p-4 font-mono text-slate-300">${p.duration || '00:00'}</td>
+                    <td class="p-4 text-slate-300">${p.platform || 'YouTube'}</td>
+                    <td class="p-4">
+                        <span class="flex items-center space-x-1 ${p.check ? 'text-emerald-400' : 'text-slate-500'}">
+                            <i class="${p.check ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i>
+                            <span>${p.check ? 'Verified' : 'Pending'}</span>
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded text-[9px] font-bold ${getStatusClass(p.status)}">
+                            ${p.status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center font-bold text-slate-300">${p.revision}</td>
+                    <td class="p-4">
+                        ${getSmartLinkBadge(p.link)}
+                    </td>
+                    <td class="p-4 text-right space-x-2 whitespace-nowrap">
+                        <button onclick="editEntry(${p.id})" class="text-amber-400 hover:text-amber-300 font-semibold text-[11px]"><i class="fa-solid fa-edit"></i> Edit</button>
+                        <button onclick="sendToRevision(${p.id})" class="text-blue-400 hover:text-blue-300 font-semibold text-[11px]"><i class="fa-solid fa-rotate-left"></i> Revise</button>
+                        <button onclick="deleteEntry(${p.id})" class="text-rose-400 hover:text-rose-300 font-semibold text-[11px]"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function formatDate(dateStr) {
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Completed': return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                case 'In Progress': return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+                case 'Revision': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+                case "Pending Doctor's Approval": return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
+                default: return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
+            }
+        }
+
+        // ব্রাউজার লোড স্টার্টআপ লজিক (DOMContentLoaded এর মাধ্যমে তাৎক্ষণিক লোড নিশ্চিত করা হলো)
+        function initializeSystem() {
+            let users = {};
+            
+            // ডাটাবেস অটো-মেরামত
+            try {
+                users = JSON.parse(SafeStorage.getItem('med_tracker_users')) || {};
+            } catch (e) {
+                SafeStorage.removeItem('med_tracker_users');
+                users = {};
+            }
+            
+            const todayStr = getLocalDateString();
+            
+            // ফর্ম এলিমেন্টগুলো নিরাপদে সেট করা
+            const formDateEl = document.getElementById('formDate');
+            const filterReportDateEl = document.getElementById('filterReportDate');
+            if (formDateEl) formDateEl.value = todayStr;
+            if (filterReportDateEl) filterReportDateEl.value = todayStr;
+
+            // যদি স্টোরেজে ইউজার প্রোফাইল না থাকে তবে স্বয়ংক্রিয়ভাবে ডিফল্ট প্রোফাইল তৈরি
+            if (Object.keys(users).length === 0 || !users['habib99']) {
+                users['habib99'] = {
+                    name: 'MD Habibur Rahman',
+                    email: 'habibur@example.com',
+                    userId: 'habib99',
+                    password: '123',
+                    pin: '123456'
+                };
+                SafeStorage.setItem('med_tracker_users', JSON.stringify(users));
+
+                // প্রথমবার কাজের ডেমো ডাটা সেটআপ
+                const demoData = [
+                    { id: 1, date: todayStr, client: 'Dr. Kabir (Cardiologist)', type: 'Map Animation', qty: 2, check: true, status: 'Completed', revision: 0, link: 'https://canva.com', notes: 'রেন্ডার শেষ', duration: '12:30', platform: 'YouTube' },
+                    { id: 2, date: todayStr, client: 'Care Hospital', type: 'Awareness Video', qty: 1, check: true, status: 'In Progress', revision: 1, link: 'https://drive.google.com', notes: 'কালার গ্রেডিং বাকী', duration: '01:30', platform: 'Shorts' }
+                ];
+                SafeStorage.setItem('med_tracker_data_habib99', JSON.stringify(demoData));
+                SafeStorage.setItem('med_tracker_last_user', 'habib99');
+            }
+
+            // সক্রিয় সেশন রিস্টোর চেক (বারবার লগইন করার ঝামেলা এড়াতে)
+            const lastActiveUser = SafeStorage.getItem('med_tracker_last_user');
+            if (lastActiveUser && users[lastActiveUser]) {
+                initiateUserSession(users[lastActiveUser]);
+            }
+        }
+
+        // DOMContentLoaded ব্যবহার করা হলো যাতে ইমেজ বা অন্যান্য রিসোর্স লোডের আগেই ড্যাশবোর্ড স্ক্রিপ্ট রান হয়
+        document.addEventListener('DOMContentLoaded', initializeSystem);
+    </script>
+</body>
+</html>
